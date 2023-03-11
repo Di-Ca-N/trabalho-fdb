@@ -1,8 +1,28 @@
--- Modelo Lógico - PokémonGO
-
 /*****************************************************
  ************  DEFINIÇÃO DAS TABELAS  ****************             
  *****************************************************/
+
+DROP TABLE IF EXISTS AtaquesConhecidos;
+DROP TABLE IF EXISTS PokemonCapturados CASCADE;
+DROP TABLE IF EXISTS TentativasDeCaptura;
+DROP TABLE IF EXISTS Ataques;
+DROP TABLE IF EXISTS Ginasios;
+DROP TABLE IF EXISTS Pokestops;
+DROP TABLE IF EXISTS Fotodiscos;
+DROP TABLE IF EXISTS TipoForma;
+DROP TABLE IF EXISTS Composicoes;
+DROP TABLE IF EXISTS Inventarios;
+DROP TABLE IF EXISTS Jogadores;
+DROP TABLE IF EXISTS Locais;
+DROP TABLE IF EXISTS ConjuntosDeItens;
+DROP TABLE IF EXISTS PokemonSelvagens;
+DROP TABLE IF EXISTS Formas;
+DROP TABLE IF EXISTS Especies;
+DROP TABLE IF EXISTS Tipos;
+DROP TABLE IF EXISTS Itens;
+DROP TYPE IF EXISTS tipo_local;
+DROP TYPE IF EXISTS time_jogador;
+DROP TYPE IF EXISTS classe_item;
 
 -- Tipos de Enumeração usados na modelagem
 CREATE TYPE classe_item AS ENUM ('doce', 'isca', 'pokebola', 'poeira', 'reviver', 'pocao');
@@ -118,6 +138,7 @@ CREATE TABLE IF NOT EXISTS Locais (
 	
 	conjunto_id integer NOT NULL,
 	PRIMARY KEY (id),
+    UNIQUE (latitude, longitude),
 	FOREIGN KEY (conjunto_id) REFERENCES ConjuntosDeItens
 );
 
@@ -188,6 +209,7 @@ CREATE TABLE IF NOT EXISTS PokemonCapturados (
 	id serial NOT NULL,
 	forma_id integer NOT NULL,
 	
+    nome varchar(32) NOT NULL,
 	vida_atual smallint NOT NULL,
 	iv_vida smallint NOT NULL,
 	iv_ataque smallint NOT NULL,
@@ -249,7 +271,8 @@ INSERT INTO Itens(id, nome, classe) VALUES
 INSERT INTO Jogadores(id, nome, experiencia, time) VALUES 
 	(1, 'Jogador 1', 10000, 'instinct'), 
 	(2, 'Jogador 2', 1000000, 'valor'), 
-	(3, 'Jogador 3', 1000, NULL);
+	(3, 'Jogador 3', 1000, NULL),
+	(4, 'Jogador 4', 15000, 'instinct');
 
 INSERT INTO Inventarios(jogador_id, item_id, quantidade) VALUES
 	(1, 1, 10), -- 10 Pokebola
@@ -261,7 +284,8 @@ INSERT INTO Inventarios(jogador_id, item_id, quantidade) VALUES
 	(2, 3, 2), -- 2 Isca
 	(3, 1, 20), -- 20 Pokebola
 	(3, 3, 1), --  1 Isca
-	(3, 2, 1000); -- 1000 Poeira Estelar
+	(3, 2, 1000), -- 1000 Poeira Estelar
+	(1, 7, 52); -- 52 Doce Vulpix
 
 INSERT INTO 
 	Especies(id, nome, vida_base, ataque_base, defesa_base, prob_captura, prob_fuga, doce_id) 
@@ -273,7 +297,8 @@ VALUES
 	(5, 'Charmeleon', 151, 158, 126, 0.10, 0.07, 4),
 	(6, 'Charizard',  186, 223, 173, 0.05, 0.05, 4),
 	(7, 'Squirtle',   127,  94, 121, 0.20, 0.10, 5),
-	(37, 'Vulpix',    116,  96, 109, 0.30, 0.10, 7);
+	(37, 'Vulpix',    116,  96, 109, 0.30, 0.10, 7),
+	(38, 'Ninetales', 177, 169, 190, 0.10, 0.06, 7);
 	
 INSERT INTO 
 	Formas (id, especie_id, nome, evolui_de, custo_evolucao) 
@@ -286,7 +311,9 @@ VALUES
 	(6, 6, 'Padrão', 5, 100),     -- Charizard Padrão	
 	(7, 7, 'Padrão', NULL, NULL), -- Squirtle Padrão
 	(8, 37, 'Padrão', NULL, NULL),-- Vulpix Padrão
-	(9, 37, 'Alola', NULL, NULL); -- Vulpix de Alola
+	(9, 37, 'Alola', NULL, NULL), -- Vulpix de Alola
+	(10, 38, 'Padrão', 8, 50),    -- Ninetales Padrão
+	(11, 38, 'Alola', 9, 50);     -- Ninetales de Alola
 
 INSERT INTO 
 	Tipos (id, nome)
@@ -322,7 +349,9 @@ VALUES
 	(6, 8),
 	(7, 5),
 	(8, 6),
-	(9, 2);
+	(9, 2),
+	(10, 6),
+	(11, 2);
 
 -- Por padrão, apenas 2 conjuntos de itens (para Pokéstops e Ginásios).
 -- Em eventos especiais, mais conjuntos podem ser criados
@@ -393,15 +422,19 @@ VALUES
 
 INSERT INTO
 	PokemonCapturados(
-		id, forma_id, vida_atual, iv_vida, iv_ataque, iv_defesa, nivel, 
+		id, nome, forma_id, vida_atual, iv_vida, iv_ataque, iv_defesa, nivel, 
 		treinador_id, favorito, defensor_ginasio_id, defensor_motivacao
 	)
 VALUES
-	(1, 6, 100, 14, 15, 15, 20, 1, FALSE, NULL, NULL),
-	(2, 3, 150, 15, 10, 13, 25, 1, TRUE, 4, 1000),
-	(3, 8,  80,  8,  9, 12, 13, 2, FALSE, NULL, NULL),
-	(4, 5,  83,  1,  0,  4, 10, 3, FALSE, 5, 200);
-	
+	(1, 'Charizard', 6, 100, 14, 15, 15, 20, 1, FALSE, NULL, NULL),
+	(2, 'Venusaur', 3, 150, 15, 10, 13, 25, 1, TRUE, 4, 1000),
+	(3, 'Vulpix', 8, 80,  8,  9, 12, 13, 2, FALSE, NULL, NULL),
+	(4, 'Charmeleon', 5,  83,  1,  0,  4, 10, 3, FALSE, 5, 200),
+	(5, 'Raposinha', 8,  120,  8,  15, 15, 15, 1, TRUE, NULL, NULL),
+	(6, 'Charigarto', 4, 79, 10, 5, 11, 7, 1, FALSE, NULL, NULL),
+	(7, 'Charmander', 4, 79, 10, 5, 11, 7, 4, FALSE, 4, 300);
+
+
 INSERT INTO 
 	AtaquesConhecidos(pokemon_id, ataque_id)
 VALUES
@@ -413,7 +446,9 @@ VALUES
 	(3, 1), -- Vulpix 3, Presa de fogo
 	(3, 2), -- Vulpix 3, Incinerar
 	(4, 4), -- Charmeleon 1, Arranhão
-	(4, 2); -- Charmeleon 1, Incinerar
+	(4, 2), -- Charmeleon 1, Incinerar
+	(5, 4), -- Raposinha, Arranhão
+	(5, 7); -- Raposinha, Raio Solar
 
 INSERT INTO
 	FotoDiscos(jogador_id, local_id, ultimo_giro)
