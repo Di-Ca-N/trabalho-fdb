@@ -64,6 +64,18 @@ WHERE id NOT IN (
 	
 -- 
 
+-- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
+CREATE OR REPLACE PROCEDURE expulsa_pokemon(id_pokemon serial)
+LANGUAGE SQL
+BEGIN ATOMIC
+	UPDATE PokemonCapturados
+	SET defensor_ginasio_id = NULL, defensor_motivacao = NULL, vida_atual = 0
+	WHERE id = id_pokemon;
+END;
 
-
-
+-- Monitora se a motivação do Pokémon capturado é maior que zero
+CREATE OR REPLACE TRIGGER monitora_motivacao
+AFTER INSERT OR UPDATE ON PokemonCapturados
+	FOR EACH ROW
+	WHEN (NEW.defensor_motivacao = 0)
+	EXECUTE FUNCTION expulsa_pokemon(NEW.id);

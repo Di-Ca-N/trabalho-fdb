@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS PokemonCapturados (
 		0 <= iv_defesa AND iv_defesa <= 15
 	),
 	CHECK (
-		defensor_ginasio_id IS NOT NULL AND defensor_motivacao > 0 
+		defensor_ginasio_id IS NOT NULL AND defensor_motivacao >= 0 
 		OR 
 		defensor_ginasio_id IS NULL AND defensor_motivacao IS NULL
 	)
