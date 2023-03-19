@@ -61,7 +61,16 @@ WHERE id NOT IN (
 		JOIN Jogadores ON treinador_id=Jogadores.id
 	WHERE Jogadores.nome='Jogador 1'
 );
-	
+
+-- Quantos Pokémon capturados de cada forma o jogador 1 tem
+SELECT P.nome, COUNT(*)
+FROM Jogadores J
+	JOIN PokemonCapturados P ON J.id=P.treinador_id
+	JOIN Formas F ON P.forma_id=F.id
+WHERE J.nome='Jogador 1'
+GROUP BY P.nome
+ORDER BY P.nome;
+
 -- 
 
 -- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
