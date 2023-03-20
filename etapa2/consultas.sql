@@ -9,7 +9,7 @@ FROM PokemonCapturados
 	JOIN Especies ON Especies.id=Formas.especie_id;
 
 
--- Todos os itens que estão no inventário do 'Jogador 1'
+-- Inventário do 'Jogador 1', incluindo itens e quantidades
 SELECT Itens.nome, Itens.classe, Inventarios.quantidade
 FROM Itens 
 	JOIN Inventarios ON Inventarios.item_id=Itens.id 
@@ -42,8 +42,9 @@ WHERE especies.ataque_base=(
 	WHERE tipo_id=TipoEXT.tipo_id
 );
 
--- Para cada ginásio, qual é a menor motivação entre os defensores, para todos os ginásios que possuem 
--- pelo menos 2 defensores
+-- TODO: não tem 3 tabelas
+-- Para cada ginásio, qual é a menor motivação entre os pokémon defensores e qual
+-- é o id do treinador desse pokémon, para todos os ginásios que possuem pelo menos 2 defensores
 SELECT Ginasios.local_id, MIN(PokemonCapturados.defensor_motivacao)
 FROM Ginasios
 	JOIN PokemonCapturados ON Ginasios.local_id=PokemonCapturados.defensor_ginasio_id
@@ -71,8 +72,14 @@ WHERE J.nome='Jogador 1'
 GROUP BY P.nome
 ORDER BY P.nome;
 
--- 
+-- Quantos ginásios são defendidos por cada time
+SELECT time, COUNT(DISTINCT local_id)
+FROM Jogadores
+	JOIN PokemonCapturados ON PokemonCapturados.treinador_id=Jogadores.id
+	JOIN Ginasios ON Ginasios.local_id=PokemonCapturados.defensor_ginasio_id
+GROUP BY time;
 
+-- Qual é o time que 
 -- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
 CREATE OR REPLACE FUNCTION expulsa_pokemon() RETURNS trigger AS $$
 BEGIN
