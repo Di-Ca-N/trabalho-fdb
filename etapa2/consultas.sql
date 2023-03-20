@@ -1,3 +1,13 @@
+-- Checklist:
+-- [x] 1 visão
+-- [x] 1 trigger
+-- [x] 2 com subconsulta
+-- [x] 1 consulta group by
+-- [ ] 2 consultas com visão
+-- [ ] 1 consulta group by + having
+-- [ ] 10 consultas com pelo menos 3 tabelas
+-- [ ] 1 consulta NOT EXISTS obrigratório (query TODOS/NENHUM)
+
 DROP VIEW IF EXISTS pokemon_capturados_completos;
 CREATE VIEW pokemon_capturados_completos AS
 SELECT 
