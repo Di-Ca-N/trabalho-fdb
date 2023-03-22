@@ -89,6 +89,14 @@ FROM Jogadores
 	JOIN Ginasios ON Ginasios.local_id=PokemonCapturados.defensor_ginasio_id
 GROUP BY time;
 
+-- Quais são os itens obtíveis no local de id 1
+SELECT nome
+FROM Locais L
+	JOIN ConjuntosDeItens CI ON L.conjunto_id=CI.id
+	JOIN Composicoes CO ON CI.id=CO.conjunto_id
+	JOIN Itens I ON I.id=item_id
+WHERE L.id=1;
+
 -- Qual é o time que 
 -- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
 CREATE OR REPLACE FUNCTION expulsa_pokemon() RETURNS trigger AS $$
