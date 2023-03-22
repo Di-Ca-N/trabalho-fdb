@@ -272,7 +272,8 @@ INSERT INTO Jogadores(id, nome, experiencia, time) VALUES
 	(1, 'Jogador 1', 10000, 'instinct'), 
 	(2, 'Jogador 2', 1000000, 'valor'), 
 	(3, 'Jogador 3', 1000, NULL),
-	(4, 'Jogador 4', 15000, 'instinct');
+	(4, 'Jogador 4', 15000, 'instinct'),
+	(5, 'Jogador 5', 5000, NULL);
 
 INSERT INTO Inventarios(jogador_id, item_id, quantidade) VALUES
 	(1, 1, 10), -- 10 Pokebola
@@ -432,8 +433,9 @@ VALUES
 	(4, 'Charmeleon', 5,  83,  1,  0,  4, 10, 3, FALSE, 5, 200),
 	(5, 'Raposinha', 8,  120,  8,  15, 15, 15, 1, TRUE, NULL, NULL),
 	(6, 'Charigarto', 4, 79, 10, 5, 11, 7, 1, FALSE, NULL, NULL),
-	(7, 'Charmander', 4, 79, 10, 5, 11, 7, 4, FALSE, 4, 300)
-	(8, 'Venusaur', 3, 50, 15, 10, 13, 25, 1, FALSE, NULL, NULL);
+	(7, 'Charmander', 4, 79, 10, 5, 11, 7, 4, FALSE, 4, 300),
+	(8, 'Venusaur', 3, 50, 15, 10, 13, 25, 1, FALSE, NULL, NULL),
+	(9, 'Vulpix', 8, 70, 10, 7, 10, 15, 5, FALSE, NULL, NULL);
 
 
 INSERT INTO 
