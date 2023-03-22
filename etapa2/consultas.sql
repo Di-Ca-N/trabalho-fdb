@@ -6,7 +6,7 @@
 -- [ ] 2 consultas com visão
 -- [ ] 1 consulta group by + having
 -- [ ] 10 consultas com pelo menos 3 tabelas
--- [ ] 1 consulta NOT EXISTS obrigratório (query TODOS/NENHUM)
+-- [x] 1 consulta NOT EXISTS obrigratório (query TODOS/NENHUM)
 
 DROP VIEW IF EXISTS pokemon_capturados_completos;
 CREATE VIEW pokemon_capturados_completos AS
@@ -89,6 +89,7 @@ FROM Jogadores
 	JOIN Ginasios ON Ginasios.local_id=PokemonCapturados.defensor_ginasio_id
 GROUP BY time;
 
+
 -- Quais são os itens obtíveis no local de id 1
 SELECT nome
 FROM Locais L
@@ -96,6 +97,44 @@ FROM Locais L
 	JOIN Composicoes CO ON CI.id=CO.conjunto_id
 	JOIN Itens I ON I.id=item_id
 WHERE L.id=1;
+
+
+-- Todos os jogadores que possuem Pokémon de todas as espécies que o Jogador 1 possui, e somente essas
+SELECT nome
+FROM Jogadores J1
+WHERE
+	nome<>'Jogador 1'
+	AND NOT EXISTS (  -- Id do Jogador 1, caso tenha capturado alguma espécie que o outro jogador não capturou
+		SELECT J2.id
+		FROM Jogadores J2
+			JOIN PokemonCapturados P2 ON J2.id=P2.treinador_id
+			JOIN Formas F2 ON P2.forma_id=F2.id
+		WHERE
+			J2.nome='Jogador 1'
+			AND F2.especie_id NOT IN (	 -- Espécies que um jogador capturou
+				SELECT DISTINCT F3.especie_id
+				FROM Jogadores J3
+					JOIN PokemonCapturados P3 ON J3.id=P3.treinador_id
+					JOIN Formas F3 ON P3.forma_id=F3.id
+				WHERE J3.id=J1.id
+			)
+	)
+	AND NOT EXISTS (  -- Id dos jogadores que capturaram espécies que o Jogador 1 não capturou 
+		SELECT DISTINCT J2.id
+		FROM Jogadores J2
+			JOIN PokemonCapturados P2 ON J2.id=P2.treinador_id
+			JOIN Formas F2 ON P2.forma_id=F2.id
+		WHERE
+			J2.id=J1.id
+			AND F2.especie_id NOT IN (	 -- Espécies que o Jogador 1 capturou
+				SELECT DISTINCT F3.especie_id
+				FROM Jogadores J3
+					JOIN PokemonCapturados P3 ON J3.id=P3.treinador_id
+					JOIN Formas F3 ON P3.forma_id=F3.id
+				WHERE J3.nome='Jogador 1'
+			)
+	)
+;
 
 -- Qual é o time que 
 -- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
