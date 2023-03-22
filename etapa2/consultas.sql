@@ -73,14 +73,15 @@ WHERE id NOT IN (
 	WHERE Jogadores.nome='Jogador 1'
 );
 
--- Quantos Pokémon capturados de cada forma o jogador 1 tem
-SELECT P.nome, COUNT(*)
+-- Quantos Pokémon capturados de cada espécie o jogador 1 tem
+SELECT E.nome, COUNT(*)
 FROM Jogadores J
 	JOIN PokemonCapturados P ON J.id=P.treinador_id
 	JOIN Formas F ON P.forma_id=F.id
+	JOIN Especies E ON F.especie_id=E.id
 WHERE J.nome='Jogador 1'
-GROUP BY P.nome
-ORDER BY P.nome;
+GROUP BY (E.nome)
+ORDER BY (E.nome);
 
 -- Quantos ginásios são defendidos por cada time
 SELECT time, COUNT(DISTINCT local_id)
@@ -90,8 +91,8 @@ FROM Jogadores
 GROUP BY time;
 
 
--- Quais são os itens obtíveis no local de id 1
-SELECT nome
+-- Quais são os ids, nomes e proabilidades dos itens obtíveis no local de id 1
+SELECT I.id, nome, probabilidade
 FROM Locais L
 	JOIN ConjuntosDeItens CI ON L.conjunto_id=CI.id
 	JOIN Composicoes CO ON CI.id=CO.conjunto_id

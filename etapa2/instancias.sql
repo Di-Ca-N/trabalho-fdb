@@ -1,5 +1,5 @@
 /*****************************************************
- ************  DEFINIÇÃO DAS TABELAS  ****************             
+ ************  DEFINIÇÃO DAS TABELAS  ****************
  *****************************************************/
 
 DROP TABLE IF EXISTS AtaquesConhecidos;
@@ -127,6 +127,8 @@ CREATE TABLE IF NOT EXISTS Composicoes (
 	probabilidade real NOT NULL,
 	
 	PRIMARY KEY (item_id, conjunto_id),
+	FOREIGN KEY (item_id) REFERENCES Itens,
+	FOREIGN KEY (conjunto_id) REFERENCES ConjuntosDeItens,
 	CHECK (probabilidade > 0)
 );
 
@@ -265,8 +267,8 @@ INSERT INTO Itens(id, nome, classe) VALUES
 	(9, 'SuperPoção', 'pocao'),
 	(10, 'HiperPoção', 'pocao'),
 	(11, 'Greatball', 'pokebola'),
-	(13, 'Ultraball', 'pokebola'),
-	(14, 'Isca gelada', 'isca');
+	(12, 'Ultraball', 'pokebola'),
+	(13, 'Isca gelada', 'isca');
 
 INSERT INTO Jogadores(id, nome, experiencia, time) VALUES 
 	(1, 'Jogador 1', 10000, 'instinct'), 
@@ -359,7 +361,7 @@ VALUES
 INSERT INTO ConjuntosDeItens (id) VALUES (1), (2);
 
 INSERT INTO 
-	Composicoes(item_id, conjunto_id, probabilidade)
+	Composicoes(conjunto_id, item_id, probabilidade)
 VALUES
 	(1,  1, 0.40), -- 40% Pokebola
 	(1, 11, 0.20), -- 20% Greatball
@@ -373,7 +375,7 @@ VALUES
 	(2,  1, 0.15), -- 15% Pokebola
 	(2, 11, 0.10), -- 10% Greatball
 	(2, 12, 0.05); --  5% Ultraball
-	
+
 INSERT INTO 
 	Locais(id, latitude, longitude, tipo, conjunto_id)
 VALUES 
@@ -389,7 +391,7 @@ INSERT INTO
 VALUES
 	(1, NULL, NULL, NULL),
 	(2, 1, 3, NOW()),
-	(3, 2, 14, NOW());
+	(3, 2, 13, NOW());
 
 INSERT INTO Ginasios(local_id) VALUES (4), (5), (6);
 
