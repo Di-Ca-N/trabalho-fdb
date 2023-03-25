@@ -277,7 +277,7 @@ INSERT INTO Jogadores(id, nome, experiencia, time) VALUES
 	(2, 'Jogador 2', 1000000, 'valor'), 
 	(3, 'Jogador 3', 1000, NULL),
 	(4, 'Jogador 4', 15000, 'instinct'),
-	(5, 'Jogador 5', 5000, NULL),
+	(5, 'Jogador 5', 5000, 'mystic'),
 	(6, 'Jogador 6', 153200, 'instinct'),
 	(7, 'Jogador 7', 123450, 'valor');
 
@@ -388,7 +388,9 @@ VALUES
 	(3, -30.037614, -51.212919, 'P', 1),
 	(4, -30.037261, -51.217645, 'G', 2),
 	(5, -30.036453, -51.212543, 'G', 2),
-	(6, -30.037540, -51.213257, 'G', 2);
+	(6, -30.037540, -51.213257, 'G', 2),
+	(7, -30.035120, -51.216217, 'G', 2),
+	(8, -30.036642, -51.215125, 'G', 2);
 
 INSERT INTO
 	Pokestops(local_id, isca_jogador_id, isca_item_id, isca_validade)
@@ -397,7 +399,7 @@ VALUES
 	(2, 1, 3, NOW() + interval '30 minutes'),
 	(3, 2, 13, NOW() + interval '20 minutes');
 
-INSERT INTO Ginasios(local_id) VALUES (4), (5), (6);
+INSERT INTO Ginasios(local_id) VALUES (4), (5), (6), (7), (8);
 
 INSERT INTO
 	Ataques(id, nome, dano, velocidade, tipo_id)
@@ -408,7 +410,10 @@ VALUES
 	(4, 'Arranhão',           6,   5, 9),
 	(5, 'Impacto Corporal',  50,  19, 9),
 	(6, 'Folha Navalha',     13,  10, 1),
-	(7, 'Raio Solar',        180, 49, 1);
+	(7, 'Raio Solar',        180, 49, 1),
+	(8, 'Chama Furacão',      14, 11, 6),
+	(9, 'Cachoeira',          16, 12, 5),
+	(10, 'Pancada',            7,  6, 9);
 
 INSERT INTO
 	PokemonSelvagens(id, forma_id, latitude, longitude, visivel_ate)
@@ -433,16 +438,16 @@ INSERT INTO
 		treinador_id, favorito, defensor_ginasio_id, defensor_motivacao
 	)
 VALUES
-	(1, 'Charizard', 6, 100, 14, 15, 15, 20, 1, FALSE, NULL, NULL),
+	(1, 'Charizard', 6, 100, 14, 15, 15, 20, 1, FALSE, 8, 834),
 	(2, 'Venusaur', 3, 150, 15, 10, 13, 25, 1, TRUE, 4, 1000),
 	(3, 'Ninetales', 10, 80,  8,  9, 12, 13, 2, FALSE, NULL, NULL),
 	(4, 'Charmeleon', 5,  83,  1,  0,  4, 10, 2, FALSE, 5, 200),
 	(5, 'Raposinha', 8,  120,  8,  15, 15, 15, 1, TRUE, NULL, NULL),
-
 	(6, 'Charigarto', 4, 79, 10, 5, 11, 7, 1, FALSE, NULL, NULL),
 	(7, 'Charmander', 4, 79, 10, 5, 11, 7, 4, FALSE, 4, 300),
 	(8, 'Venusaur', 3, 50, 15, 10, 13, 25, 1, FALSE, NULL, NULL),
-	(9, 'Ninetales', 10, 70, 10, 7, 10, 15, 5, FALSE, NULL, NULL),
+	
+	(9, 'Ninetales', 10, 70, 10, 7, 10, 15, 5, FALSE, 7, 1500),
 	(10, 'Squirtle', 7, 50,  14,  13, 10, 9, 2, TRUE, NULL, NULL),
 	(11, 'Charizard', 6, 100, 14, 15, 15, 20, 6, FALSE, 4, 2000),
 	(12, 'Vulpix', 8, 70, 10, 7, 10, 15, 7, FALSE, 5, 500);
@@ -451,17 +456,30 @@ VALUES
 INSERT INTO 
 	AtaquesConhecidos(pokemon_id, ataque_id)
 VALUES
-	(1, 1), -- Charizard 1, Presa de Fogo
-	(1, 2), -- Charizard 1, Incinerar
-	(1, 3), -- Charizard 1, Soco de Fogo
-	(2, 4), -- Venusaur 2, Arranhão
-	(2, 7), -- Venusaur 2, Raio Solar
-	(3, 1), -- Vulpix 3, Presa de fogo
-	(3, 2), -- Vulpix 3, Incinerar
-	(4, 4), -- Charmeleon 1, Arranhão
-	(4, 2), -- Charmeleon 1, Incinerar
-	(5, 4), -- Raposinha, Arranhão
-	(5, 7); -- Raposinha, Raio Solar
+	(1, 1),  -- Charizard, Presa de Fogo
+	(1, 2),  -- Charizard, Incinerar
+	(2, 4),  -- Venusaur, Arranhão
+	(2, 7),  -- Venusaur, Raio Solar
+	(3, 1),  -- Vulpix, Presa de fogo
+	(3, 2),  -- Vulpix, Incinerar
+	(4, 4),  -- Charmeleon, Arranhão
+	(4, 2),  -- Charmeleon, Incinerar
+	(5, 4),  -- Raposinha, Arranhão
+	(5, 7),  -- Raposinha, Raio Solar
+	(6, 8),  -- Charmander, Chama furacão
+	(6, 3),  -- Charmander, Soco de fogo
+	(7, 10), -- Charmander, Pancada
+	(7, 2),  -- Charmander, Incinerar
+	(8, 10), -- Venusaur, Pancada
+	(8, 7),  -- Venusaur, Raio Solar
+	(9, 10), -- Ninetails, Pancada
+	(9, 3),  -- Soco de fogo
+	(10, 9), -- Squirtle, Cachoeira
+	(10, 4), -- Squirtle, Arranhão
+	(11, 1), -- Charizard, Presa de Fogo
+	(11, 3), -- Charizard, Soco de fogo
+	(12, 10),-- Vulpix, Pancada
+	(12, 4); -- Vulpix, Arranhão
 
 INSERT INTO
 	FotoDiscos(jogador_id, local_id, ultimo_giro)

@@ -1,12 +1,4 @@
--- Checklist:
--- [x] 1 visão
--- [x] 1 trigger
--- [x] 2 com subconsulta
--- [x] 1 consulta group by
--- [X] 2 consultas com visão
--- [X] 1 consulta group by + having
--- [x] 10 consultas com pelo menos 3 tabelas
--- [x] 1 consulta NOT EXISTS obrigratório (query TODOS/NENHUM)
+-- Grupo: Diego Nunes e Felipe Gallois
 
 -- ==============================================
 -- ================== VISÃO =====================
@@ -21,27 +13,6 @@ SELECT
 FROM PokemonCapturados
 	JOIN Formas ON Formas.id=PokemonCapturados.forma_id
 	JOIN Especies ON Especies.id=Formas.especie_id;
-
--- ==============================================
--- ============ PROCEDURE E TRIGGER =============
--- ==============================================
-
--- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
-CREATE OR REPLACE FUNCTION expulsa_pokemon() RETURNS trigger AS $$
-BEGIN
-	IF (NEW.defensor_motivacao=0) THEN
-		UPDATE PokemonCapturados
-		SET defensor_ginasio_id = NULL, defensor_motivacao = NULL, vida_atual = 0
-		WHERE id=NEW.id;
-	END IF;
-	RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
--- Monitora atualizações na tabela PokemonCapturados
-CREATE OR REPLACE TRIGGER monitora_motivacao
-AFTER INSERT OR UPDATE ON PokemonCapturados
-	FOR EACH ROW EXECUTE FUNCTION expulsa_pokemon();
 
 
 -- ==============================================
@@ -122,7 +93,6 @@ FROM Jogadores
 	JOIN Ginasios ON Ginasios.local_id=PokemonCapturados.defensor_ginasio_id
 GROUP BY time;
 
-
 -- 8) Quais são os ids, nomes e probabilidades dos itens obtíveis no local de id 1
 SELECT I.id, nome, probabilidade
 FROM Locais L
@@ -132,15 +102,14 @@ FROM Locais L
 WHERE L.id=1;
 
 -- 9) id e nome dos jogadores que não possuem nenhum pokémon das espécies que o 
---  Jogador 1 capturou
+-- Jogador 1 possui
 SELECT id, nome
 FROM Jogadores JEXT
 WHERE nome<>'Jogador 1' AND NOT EXISTS (
 	SELECT especie_id
 	FROM PokemonCapturados
-		JOIN Jogadores ON Jogadores.id=treinador_id
 		JOIN Formas ON Formas.id=forma_id
-	WHERE Jogadores.id = JEXT.id
+	WHERE treinador_id = JEXT.id
 
 	INTERSECT
 
@@ -166,40 +135,28 @@ FROM Locais
 	JOIN Pokestops P ON P.local_id=Locais.id
 WHERE jogador_id=1 AND isca_validade > NOW();
 
--- TODO: REVISAR OU ADICIONAR INSTÂNCIAS
--- Todos os jogadores que possuem Pokémon de todas as espécies que o Jogador 1 possui, e somente essas
-SELECT nome
-FROM Jogadores J1
-WHERE
-	nome<>'Jogador 1'
-	AND NOT EXISTS (  -- Id do Jogador 1, caso tenha capturado alguma espécie que o outro jogador não capturou
-		SELECT J2.id
-		FROM Jogadores J2
-			JOIN PokemonCapturados P2 ON J2.id=P2.treinador_id
-			JOIN Formas F2 ON P2.forma_id=F2.id
-		WHERE
-			J2.nome='Jogador 1'
-			AND F2.especie_id NOT IN (	 -- Espécies que um jogador capturou
-				SELECT DISTINCT F3.especie_id
-				FROM Jogadores J3
-					JOIN PokemonCapturados P3 ON J3.id=P3.treinador_id
-					JOIN Formas F3 ON P3.forma_id=F3.id
-				WHERE J3.id=J1.id
-			)
-	)
-	AND NOT EXISTS (  -- Id dos jogadores que capturaram espécies que o Jogador 1 não capturou 
-		SELECT DISTINCT J2.id
-		FROM Jogadores J2
-			JOIN PokemonCapturados P2 ON J2.id=P2.treinador_id
-			JOIN Formas F2 ON P2.forma_id=F2.id
-		WHERE
-			J2.id=J1.id
-			AND F2.especie_id NOT IN (	 -- Espécies que o Jogador 1 capturou
-				SELECT DISTINCT F3.especie_id
-				FROM Jogadores J3
-					JOIN PokemonCapturados P3 ON J3.id=P3.treinador_id
-					JOIN Formas F3 ON P3.forma_id=F3.id
-				WHERE J3.nome='Jogador 1'
-			)
-	)
-;
+
+-- ==============================================
+-- ============ PROCEDURE E TRIGGER =============
+-- ==============================================
+
+-- Desvincula um Pokémon defensor de um ginásio e zera vida atual
+-- OBS: Apesar de a função abaixo não retornar valor, não se pode usar 
+-- um procedure. No Postgres só é possível criar gatilhos que chamem 
+-- funções, e essas funções devem ter retorno do tipo 'trigger'
+CREATE OR REPLACE FUNCTION expulsa_pokemon() RETURNS trigger AS $$
+BEGIN
+	UPDATE PokemonCapturados
+	SET defensor_ginasio_id = NULL, defensor_motivacao = NULL, vida_atual = 0
+	WHERE id=NEW.id;
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Monitora atualizações na tabela PokemonCapturados, expulsando o
+-- Pokémon do ginásio quando sua motivação chega a 0
+CREATE OR REPLACE TRIGGER monitora_motivacao
+AFTER INSERT OR UPDATE OF defensor_motivacao ON PokemonCapturados
+FOR EACH ROW 
+WHEN (NEW.defensor_motivacao = 0)
+EXECUTE FUNCTION expulsa_pokemon();
