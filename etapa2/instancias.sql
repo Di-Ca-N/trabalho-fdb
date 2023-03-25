@@ -394,8 +394,8 @@ INSERT INTO
 	Pokestops(local_id, isca_jogador_id, isca_item_id, isca_validade)
 VALUES
 	(1, NULL, NULL, NULL),
-	(2, 1, 3, NOW()),
-	(3, 2, 13, NOW());
+	(2, 1, 3, NOW() + interval '30 minutes'),
+	(3, 2, 13, NOW() + interval '20 minutes');
 
 INSERT INTO Ginasios(local_id) VALUES (4), (5), (6);
 
@@ -468,6 +468,7 @@ INSERT INTO
 VALUES
 	(1, 1, NOW()),
 	(1, 2, NOW()),
+	(1, 3, NOW()),
 	(2, 1, NOW()),
 	(2, 2, NOW()),
 	(2, 4, NOW()),

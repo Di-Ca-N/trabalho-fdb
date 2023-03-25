@@ -5,7 +5,7 @@
 -- [x] 1 consulta group by
 -- [X] 2 consultas com visão
 -- [X] 1 consulta group by + having
--- [ ] 10 consultas com pelo menos 3 tabelas
+-- [x] 10 consultas com pelo menos 3 tabelas
 -- [x] 1 consulta NOT EXISTS obrigratório (query TODOS/NENHUM)
 
 -- ==============================================
@@ -151,13 +151,20 @@ WHERE nome<>'Jogador 1' AND NOT EXISTS (
 	WHERE Jogadores.nome='Jogador 1'
 );
 
--- 10) Todos os Pokémon Selvagens coms os quais o Jogador 2 já encerrou 
+-- 10) id, latitude e longitude dos Pokémon Selvagens com os quais o Jogador 2 já encerrou 
 -- uma tentativa de captura
 SELECT PS.id, latitude, longitude
 FROM PokemonSelvagens PS
 	JOIN TentativasDeCaptura T ON T.pokemon_id=PS.id
 	JOIN Jogadores J ON J.id=T.jogador_id
 WHERE finalizado=true AND nome='Jogador 2';
+
+-- 11) id, latitude e longitude das Pokéstops com isca válida que o jogador 1 já interagiu alguma vez
+SELECT Locais.id, latitude, longitude
+FROM Locais
+	JOIN Fotodiscos F ON F.local_id=Locais.id
+	JOIN Pokestops P ON P.local_id=Locais.id
+WHERE jogador_id=1 AND isca_validade > NOW();
 
 -- TODO: REVISAR OU ADICIONAR INSTÂNCIAS
 -- Todos os jogadores que possuem Pokémon de todas as espécies que o Jogador 1 possui, e somente essas
