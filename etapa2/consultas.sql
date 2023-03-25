@@ -131,6 +131,25 @@ FROM Locais L
 	JOIN Itens I ON I.id=item_id
 WHERE L.id=1;
 
+-- 9) id e nome dos jogadores que não capturaram nenhum pokémon que o Jogador 1 capturou
+SELECT id, nome
+FROM Jogadores JEXT
+WHERE nome<>'Jogador 1' AND NOT EXISTS (
+	SELECT especie_id
+	FROM PokemonCapturados
+		JOIN Jogadores ON Jogadores.id=treinador_id
+		JOIN Formas ON Formas.id=forma_id
+	WHERE Jogadores.id = JEXT.id
+
+	INTERSECT
+
+	SELECT especie_id
+	FROM PokemonCapturados
+		JOIN Jogadores ON Jogadores.id=treinador_id
+		JOIN Formas ON Formas.id=forma_id
+	WHERE Jogadores.nome='Jogador 1'
+);
+
 -- TODO: REVISAR OU ADICIONAR INSTÂNCIAS
 -- Todos os jogadores que possuem Pokémon de todas as espécies que o Jogador 1 possui, e somente essas
 SELECT nome

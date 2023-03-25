@@ -435,13 +435,14 @@ INSERT INTO
 VALUES
 	(1, 'Charizard', 6, 100, 14, 15, 15, 20, 1, FALSE, NULL, NULL),
 	(2, 'Venusaur', 3, 150, 15, 10, 13, 25, 1, TRUE, 4, 1000),
-	(3, 'Vulpix', 8, 80,  8,  9, 12, 13, 2, FALSE, NULL, NULL),
+	(3, 'Ninetales', 10, 80,  8,  9, 12, 13, 2, FALSE, NULL, NULL),
 	(4, 'Charmeleon', 5,  83,  1,  0,  4, 10, 2, FALSE, 5, 200),
 	(5, 'Raposinha', 8,  120,  8,  15, 15, 15, 1, TRUE, NULL, NULL),
+
 	(6, 'Charigarto', 4, 79, 10, 5, 11, 7, 1, FALSE, NULL, NULL),
 	(7, 'Charmander', 4, 79, 10, 5, 11, 7, 4, FALSE, 4, 300),
 	(8, 'Venusaur', 3, 50, 15, 10, 13, 25, 1, FALSE, NULL, NULL),
-	(9, 'Vulpix', 8, 70, 10, 7, 10, 15, 5, FALSE, NULL, NULL),
+	(9, 'Ninetales', 10, 70, 10, 7, 10, 15, 5, FALSE, NULL, NULL),
 	(10, 'Squirtle', 7, 50,  14,  13, 10, 9, 2, TRUE, NULL, NULL),
 	(11, 'Charizard', 6, 100, 14, 15, 15, 20, 6, FALSE, 4, 2000),
 	(12, 'Vulpix', 8, 70, 10, 7, 10, 15, 7, FALSE, 5, 500);
