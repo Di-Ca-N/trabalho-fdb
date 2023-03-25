@@ -123,7 +123,7 @@ FROM Jogadores
 GROUP BY time;
 
 
--- 8) Quais são os ids, nomes e proabilidades dos itens obtíveis no local de id 1
+-- 8) Quais são os ids, nomes e probabilidades dos itens obtíveis no local de id 1
 SELECT I.id, nome, probabilidade
 FROM Locais L
 	JOIN ConjuntosDeItens CI ON L.conjunto_id=CI.id
@@ -131,7 +131,8 @@ FROM Locais L
 	JOIN Itens I ON I.id=item_id
 WHERE L.id=1;
 
--- 9) id e nome dos jogadores que não capturaram nenhum pokémon que o Jogador 1 capturou
+-- 9) id e nome dos jogadores que não possuem nenhum pokémon das espécies que o 
+--  Jogador 1 capturou
 SELECT id, nome
 FROM Jogadores JEXT
 WHERE nome<>'Jogador 1' AND NOT EXISTS (
@@ -149,6 +150,14 @@ WHERE nome<>'Jogador 1' AND NOT EXISTS (
 		JOIN Formas ON Formas.id=forma_id
 	WHERE Jogadores.nome='Jogador 1'
 );
+
+-- 10) Todos os Pokémon Selvagens coms os quais o Jogador 2 já encerrou 
+-- uma tentativa de captura
+SELECT PS.id, latitude, longitude
+FROM PokemonSelvagens PS
+	JOIN TentativasDeCaptura T ON T.pokemon_id=PS.id
+	JOIN Jogadores J ON J.id=T.jogador_id
+WHERE finalizado=true AND nome='Jogador 2';
 
 -- TODO: REVISAR OU ADICIONAR INSTÂNCIAS
 -- Todos os jogadores que possuem Pokémon de todas as espécies que o Jogador 1 possui, e somente essas
