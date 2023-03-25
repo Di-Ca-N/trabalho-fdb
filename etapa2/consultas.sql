@@ -3,8 +3,8 @@
 -- [x] 1 trigger
 -- [x] 2 com subconsulta
 -- [x] 1 consulta group by
--- [ ] 2 consultas com visão
--- [ ] 1 consulta group by + having
+-- [X] 2 consultas com visão
+-- [X] 1 consulta group by + having
 -- [ ] 10 consultas com pelo menos 3 tabelas
 -- [x] 1 consulta NOT EXISTS obrigratório (query TODOS/NENHUM)
 
@@ -52,13 +52,15 @@ WHERE especies.ataque_base=(
 	WHERE tipo_id=TipoEXT.tipo_id
 );
 
--- TODO: não tem 3 tabelas
--- Para cada ginásio, qual é a menor motivação entre os pokémon defensores e qual
--- é o id do treinador desse pokémon, para todos os ginásios que possuem pelo menos 2 defensores
-SELECT Ginasios.local_id, MIN(PokemonCapturados.defensor_motivacao)
+-- Para cada ginásio que possui pelo menos dois defensores do tipo fogo, qual é a menor 
+-- motivação entre esses defensores
+SELECT Ginasios.local_id, MIN(defensor_motivacao)
 FROM Ginasios
-	JOIN PokemonCapturados ON Ginasios.local_id=PokemonCapturados.defensor_ginasio_id
-GROUP BY Ginasios.local_id
+	JOIN pokemon_capturados_completos PC ON Ginasios.local_id=defensor_ginasio_id
+	JOIN TipoForma ON PC.forma_id=TipoForma.forma_id
+	JOIN Tipos ON TipoForma.tipo_id=Tipos.id
+WHERE Tipos.nome='Fogo'
+GROUP BY (Ginasios.local_id)
 HAVING COUNT(*) >= 2;
 
 -- Quais são os tipos de ataques que nenhum Pokémon do jogador 1 conhece
