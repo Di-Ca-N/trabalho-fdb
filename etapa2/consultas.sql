@@ -8,6 +8,10 @@
 -- [ ] 10 consultas com pelo menos 3 tabelas
 -- [x] 1 consulta NOT EXISTS obrigratório (query TODOS/NENHUM)
 
+-- ==============================================
+-- ================== VISÃO =====================
+-- ==============================================
+
 DROP VIEW IF EXISTS pokemon_capturados_completos;
 CREATE VIEW pokemon_capturados_completos AS
 SELECT 
@@ -18,17 +22,43 @@ FROM PokemonCapturados
 	JOIN Formas ON Formas.id=PokemonCapturados.forma_id
 	JOIN Especies ON Especies.id=Formas.especie_id;
 
+-- ==============================================
+-- ============ PROCEDURE E TRIGGER =============
+-- ==============================================
 
--- Inventário do 'Jogador 1', incluindo itens e quantidades
+-- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
+CREATE OR REPLACE FUNCTION expulsa_pokemon() RETURNS trigger AS $$
+BEGIN
+	IF (NEW.defensor_motivacao=0) THEN
+		UPDATE PokemonCapturados
+		SET defensor_ginasio_id = NULL, defensor_motivacao = NULL, vida_atual = 0
+		WHERE id=NEW.id;
+	END IF;
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Monitora atualizações na tabela PokemonCapturados
+CREATE OR REPLACE TRIGGER monitora_motivacao
+AFTER INSERT OR UPDATE ON PokemonCapturados
+	FOR EACH ROW EXECUTE FUNCTION expulsa_pokemon();
+
+
+-- ==============================================
+-- ================= CONSULTAS ==================
+-- ==============================================
+
+-- 1) nome, classe e quantidade dos itens que estão no inventário do 'Jogador 1'
 SELECT Itens.nome, Itens.classe, Inventarios.quantidade
 FROM Itens 
 	JOIN Inventarios ON Inventarios.item_id=Itens.id 
 	JOIN Jogadores ON Inventarios.jogador_id=Jogadores.id
 WHERE Jogadores.nome='Jogador 1';
 
--- Todos os ids dos Pokémon capturados pelo 'Jogador 1' que podem evoluir
+-- 2) ids, nome, nome da espécie, nome da forma e custo de evolução dos Pokémon 
+-- capturados pelo 'Jogador 1' que podem evoluir
 SELECT PokemonCapturados.id, PokemonCapturados.nome, forma_pokemon.nome, Especies.nome, evolucao.custo_evolucao
-FROM PokemonCapturados 
+FROM PokemonCapturados
 	JOIN Jogadores ON PokemonCapturados.treinador_id=Jogadores.id
 	JOIN Inventarios ON Inventarios.jogador_id=Jogadores.id
 	JOIN Itens ON Inventarios.item_id=Itens.id
@@ -37,8 +67,8 @@ FROM PokemonCapturados
 	LEFT JOIN Formas evolucao ON evolucao.evolui_de=forma_pokemon.id
 WHERE Jogadores.nome='Jogador 1' AND itens.id=especies.doce_id AND inventarios.quantidade>=evolucao.custo_evolucao;
 
--- nome do tipo, id da espécie, nome da espécie, id da forma e nome da forma que possui o maior ataque básico para 
--- cada tipo de pokémon
+-- 3) nome do tipo, id da espécie, nome da espécie, id da forma e nome da forma 
+-- que possui o maior ataque básico para cada tipo de pokémon
 SELECT Tipos.nome, Especies.id, Especies.nome, Formas.id, Formas.nome, Especies.ataque_base
 FROM Especies
 	JOIN Formas ON Formas.especie_id=Especies.id
@@ -52,7 +82,7 @@ WHERE especies.ataque_base=(
 	WHERE tipo_id=TipoEXT.tipo_id
 );
 
--- Para cada ginásio que possui pelo menos dois defensores do tipo fogo, qual é a menor 
+-- 4) Para cada ginásio que possui pelo menos dois defensores do tipo fogo, qual é a menor 
 -- motivação entre esses defensores
 SELECT Ginasios.local_id, MIN(defensor_motivacao)
 FROM Ginasios
@@ -63,7 +93,7 @@ WHERE Tipos.nome='Fogo'
 GROUP BY (Ginasios.local_id)
 HAVING COUNT(*) >= 2;
 
--- Quais são os tipos de ataques que nenhum Pokémon do jogador 1 conhece
+-- 5) Quais são os tipos de ataques que nenhum Pokémon do jogador 1 conhece
 SELECT *
 FROM Tipos
 WHERE id NOT IN (
@@ -75,7 +105,7 @@ WHERE id NOT IN (
 	WHERE Jogadores.nome='Jogador 1'
 );
 
--- Quantos Pokémon capturados de cada espécie o jogador 1 tem
+-- 6) Quantos Pokémon capturados de cada espécie o jogador 1 tem
 SELECT E.nome, COUNT(*)
 FROM Jogadores J
 	JOIN PokemonCapturados P ON J.id=P.treinador_id
@@ -85,7 +115,7 @@ WHERE J.nome='Jogador 1'
 GROUP BY (E.nome)
 ORDER BY (E.nome);
 
--- Quantos ginásios são defendidos por cada time
+-- 7) Quantos ginásios são defendidos por cada time
 SELECT time, COUNT(DISTINCT local_id)
 FROM Jogadores
 	JOIN PokemonCapturados ON PokemonCapturados.treinador_id=Jogadores.id
@@ -93,7 +123,7 @@ FROM Jogadores
 GROUP BY time;
 
 
--- Quais são os ids, nomes e proabilidades dos itens obtíveis no local de id 1
+-- 8) Quais são os ids, nomes e proabilidades dos itens obtíveis no local de id 1
 SELECT I.id, nome, probabilidade
 FROM Locais L
 	JOIN ConjuntosDeItens CI ON L.conjunto_id=CI.id
@@ -101,7 +131,7 @@ FROM Locais L
 	JOIN Itens I ON I.id=item_id
 WHERE L.id=1;
 
-
+-- TODO: REVISAR OU ADICIONAR INSTÂNCIAS
 -- Todos os jogadores que possuem Pokémon de todas as espécies que o Jogador 1 possui, e somente essas
 SELECT nome
 FROM Jogadores J1
@@ -138,21 +168,3 @@ WHERE
 			)
 	)
 ;
-
--- Qual é o time que 
--- Se a motivação do Pokemon capturado chegar a zero, desvincula do ginásio e zera vida atual
-CREATE OR REPLACE FUNCTION expulsa_pokemon() RETURNS trigger AS $$
-BEGIN
-	IF (NEW.defensor_motivacao=0) THEN
-		UPDATE PokemonCapturados
-		SET defensor_ginasio_id = NULL, defensor_motivacao = NULL, vida_atual = 0
-		WHERE id=NEW.id;
-	END IF;
-	RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
--- Monitora atualizações na tabela PokemonCapturados
-CREATE OR REPLACE TRIGGER monitora_motivacao
-AFTER INSERT OR UPDATE ON PokemonCapturados
-	FOR EACH ROW EXECUTE FUNCTION expulsa_pokemon();
