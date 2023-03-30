@@ -1,4 +1,5 @@
-from db_utils import run_sql_query, run_sql_script
+from db_utils import run_sql_query, run_sql_script, get_connection
+from queries import ask_user_for_query, display_records
 
 
 def main():
@@ -11,9 +12,8 @@ def main():
     while run:
         print()
         print("1. Popular o banco de dados")
-        print("2. Executar query sem parametro")
-        print("3. Executar query com parametro")
-        print("4. Testar gatilho")
+        print("2. Executar query")
+        print("3. Testar gatilho")
         print("0. Sair")
         option = input()
 
@@ -22,11 +22,9 @@ def main():
         if option == "1":
             populate_db()
         elif option == "2":
-            simple_queries()
+            handle_queries()
         elif option == "3":
-            parametrized_queries()
-        elif option == "4":
-            trigger()
+            handle_trigger()
         elif option == "0":
             run = False
         else:
@@ -39,56 +37,23 @@ def populate_db():
     Arguments:
         conn (psycopg.Connection): connection to the database
     """
-    print("Adicionando instancias ao banco de dados...")
-    run_sql_script("../etapa2/instancias.sql")
+    print("Adicionando instancias, views e triggers ao banco de dados...")
+    with get_connection() as conn:
+        run_sql_script(conn, "./sql/view_and_trigger.sql")
+        run_sql_script(conn, "./sql/instancias.sql")
     print("Pronto!")
 
 
-def simple_queries():
-    print("Selecione a consulta desejada:")
-    print("1. Número de ginásios defendidos por cada time")
+def handle_queries():
+    query = ask_user_for_query()
 
-    # TODO
+    with get_connection() as conn:
+        records = run_sql_query(conn, query.sql)
 
-
-def parametrized_queries():
-    print("Selecione a consulta desejada:")
-    print("1. Verificar inventário de um jogador")
-
-    # TODO
-
-    option = input()
-
-    print()
-
-    if option == "1":
-        inventory_query()
-    else:
-        print("Opcao invalida")
+    display_records(query.description, records)
 
 
-def inventory_query():
-    print("------ Verificar inventário de um jogador ------")
-
-    player_name = input("Nome do jogador: ")
-    query = """
-        SELECT Itens.nome, Itens.classe, Inventarios.quantidade
-        FROM Itens 
-            JOIN Inventarios ON Inventarios.item_id=Itens.id 
-            JOIN Jogadores ON Inventarios.jogador_id=Jogadores.id
-        WHERE Jogadores.nome=%s;
-    """
-
-    inventory = run_sql_query(query, [player_name])
-
-    print(f"Inventário de '{player_name}':")
-    for idx, (item, item_class, quantity) in enumerate(inventory, start=1):
-        print(f"{idx}) {item} - {item_class} - {quantity}")
-
-    print("------------------------------------------------")
-
-
-def trigger():
+def handle_trigger():
     """Display the effect of the trigger on the database
 
     This function shows the state of the database before the trigger is executed,

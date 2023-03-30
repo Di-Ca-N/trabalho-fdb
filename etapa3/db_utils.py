@@ -9,10 +9,10 @@ def get_connection():
     """Connect to the database and return the connection."""
 
     # Get the credentials from environment variables, using the defaults if missing
-    user = os.environ.get("DB_USER", "postgres")
+    user = os.environ.get("DB_USER", "pokemon")
     dbname = os.environ.get("DB_NAME", "pokemon")
     host = os.environ.get("DB_HOST", "127.0.0.1")
-    password = os.environ.get("DB_PASSWORD", "postgres")
+    password = os.environ.get("DB_PASSWORD", "pokemon")
 
     # This function uses the context manager interface and yield
     # to ensure the connection is always closed.
@@ -24,35 +24,36 @@ def get_connection():
         yield conn
 
 
-def run_sql_script(script_path):
+def run_sql_script(conn, script_path):
     """Connect to the database and execute an SQL script using the provided connection
 
     Arguments:
         conn (psycopg.Connection): Connection to the database
         script_path (str): Path to the script to be executed
     """
-    with get_connection() as conn:
-        script_file = pathlib.Path(script_path)
-        with conn.cursor() as cur:
-            script = script_file.read_text(encoding="utf-8")
-            cur.execute(script)
 
-        # Persist the changes
-        conn.commit()
+    script_file = pathlib.Path(script_path)
+    with conn.cursor() as cur:
+        script = script_file.read_text(encoding="utf-8")
+        cur.execute(script)
+
+    # Persist the changes
+    conn.commit()
 
 
-def run_sql_query(conn, query, parameters):
+def run_sql_query(conn, query, parameters=None):
     """Connect to the database, run an SQL query and return the result as a list
 
     Arguments:
         conn (psycopg.Connection): Connection to the database
         query (str): Query to be executed
+        parameters (Optional[Iterable]): parameters to the query
 
     Returns: List of records (Any)
     """
 
     parameters = parameters or []
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(query, parameters)
-            return list(cur)
+
+    with conn.cursor() as cur:
+        cur.execute(query, parameters)
+        return list(cur)
