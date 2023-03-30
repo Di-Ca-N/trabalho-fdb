@@ -32,11 +32,7 @@ def main():
 
 
 def populate_db():
-    """Apply the schema and instances to the database
-
-    Arguments:
-        conn (psycopg.Connection): connection to the database
-    """
+    """Configure the schema, views, triggers and insert instances into the database"""
     print("Adicionando instancias, views e triggers ao banco de dados...")
     with get_connection() as conn:
         run_sql_script(conn, "./sql/view_and_trigger.sql")
