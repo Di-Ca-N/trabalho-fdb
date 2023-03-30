@@ -15,7 +15,7 @@ def main():
         print("2. Executar query")
         print("3. Testar gatilho")
         print("0. Sair")
-        option = input()
+        option = input("> ")
 
         print()
 
