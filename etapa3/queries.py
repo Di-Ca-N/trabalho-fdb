@@ -58,10 +58,10 @@ def ask_user_for_query():
         try:
             option = int(input("> ")) - 1
         except ValueError:
-            print("Opcao invalida")
+            print("Opção inválida")
 
         if option < 0 or option >= len(simple_queries):
-            print("Opcao invalida")
+            print("Opção inválida")
         else:
             valid = True
 
