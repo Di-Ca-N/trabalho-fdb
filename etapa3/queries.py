@@ -56,13 +56,15 @@ def ask_user_for_query():
     valid = False
     while not valid:
         try:
-            option = int(input()) - 1
+            option = int(input("> ")) - 1
+ 
             if option < 0 or option >= len(simple_queries):
                 print("Opcao invalida")
             else:
                 valid = True
+ 
         except ValueError:
-            print("Opcao invalida")
+            print("Opção inválida")
 
     return simple_queries[option]
 
@@ -77,6 +79,7 @@ def display_records(title, records):
     top_ruler = f"----------- {title} -----------"
     bottom_ruler = "-" * len(top_ruler)
 
+    print()
     print(top_ruler)
     for idx, record in enumerate(records, start=1):
         record_str = " - ".join(str(x) for x in record)

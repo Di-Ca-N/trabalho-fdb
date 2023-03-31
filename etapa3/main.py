@@ -15,7 +15,7 @@ def main():
         print("2. Executar query")
         print("3. Testar gatilho")
         print("0. Sair")
-        option = input()
+        option = input("> ")
 
         print()
 
@@ -28,15 +28,15 @@ def main():
         elif option == "0":
             run = False
         else:
-            print("Opcao invalida")
+            print("Opção inválida")
 
 
 def populate_db():
     """Configure the schema, views, triggers and insert instances into the database"""
-    print("Adicionando instancias, views e triggers ao banco de dados...")
+    print("Adicionando instâncias, views e triggers ao banco de dados...")
     with get_connection() as conn:
-        run_sql_script(conn, "./sql/view_and_trigger.sql")
         run_sql_script(conn, "./sql/instancias.sql")
+        run_sql_script(conn, "./sql/view_and_trigger.sql")
     print("Pronto!")
 
 
