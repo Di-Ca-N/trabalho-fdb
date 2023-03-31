@@ -56,9 +56,37 @@ def handle_trigger():
     it executes an update to run the trigger, and then shows the state after the trigger
     is executed"""
 
-    # TODO
+    with get_connection() as conn:
+        records = run_sql_query(
+            conn,
+            """
+                SELECT id, nome, vida_atual, defensor_motivacao, defensor_ginasio_id
+                FROM pokemon_capturados_completos 
+                WHERE id=1;
+            """
+        )
 
-    raise NotImplementedError
+        print("Estado do banco de dados antes do gatilho:")
+        display_records("ID, nome, vida, motivação e ginásio do Pokémon com id=1", records)
+
+        print("Executando atualização - Definindo para 0 a motivação do pokemon com id=1")
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE PokemonCapturados SET defensor_motivacao=0 WHERE id=1"
+            )
+        conn.commit()
+
+        records = run_sql_query(
+            conn,
+            """
+                SELECT id, nome, vida_atual, defensor_motivacao, defensor_ginasio_id
+                FROM pokemon_capturados_completos 
+                WHERE id=1;
+            """
+        )
+
+        print("Estado do banco de dados depois do gatilho:")
+        display_records("ID, nome, vida, motivação e ginásio do Pokémon com id=1", records)
 
 
 if __name__ == "__main__":
