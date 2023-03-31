@@ -44,7 +44,7 @@ def handle_queries():
     query = ask_user_for_query()
 
     with get_connection() as conn:
-        records = run_sql_query(conn, query.sql)
+        records = query.run(conn)
 
     display_records(query.description, records)
 

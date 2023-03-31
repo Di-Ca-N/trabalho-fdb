@@ -8,14 +8,14 @@ from contextlib import contextmanager
 def get_connection():
     """Connect to the database and return the connection."""
 
-    # Get the credentials from environment variables, using the defaults if missing
+    # Get the credentials from environment variables. If missing, use the defaults instead
     user = os.environ.get("DB_USER", "pokemon")
     dbname = os.environ.get("DB_NAME", "pokemon")
     host = os.environ.get("DB_HOST", "127.0.0.1")
     password = os.environ.get("DB_PASSWORD", "pokemon")
 
     # This function uses the context manager interface and yield
-    # to ensure the connection is always closed.
+    # to ensure the connection is always closed after it is used.
     # Another alternative would be to return the connection and
     # call 'close' explicitly.
     with psycopg.connect(
@@ -25,7 +25,7 @@ def get_connection():
 
 
 def run_sql_script(conn, script_path):
-    """Connect to the database and execute an SQL script using the provided connection
+    """Execute an SQL script using the provided connection
 
     Arguments:
         conn (psycopg.Connection): Connection to the database
@@ -42,7 +42,7 @@ def run_sql_script(conn, script_path):
 
 
 def run_sql_query(conn, query, parameters=None):
-    """Connect to the database, run an SQL query and return the result as a list
+    """Run an SQL query using the provided connection
 
     Arguments:
         conn (psycopg.Connection): Connection to the database
