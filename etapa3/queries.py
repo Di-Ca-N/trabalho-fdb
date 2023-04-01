@@ -256,10 +256,3 @@ def display_records(title, records):
         print(f"{idx}) {record_str}")
 
     print(bottom_ruler)
-
-
-def run_update_query(conn):
-    print("Executando atualização - Definindo para 0 a motivação do pokemon com id=1")
-    with conn.cursor() as cur:
-        cur.execute("UPDATE PokemonCapturados SET defensor_motivacao=0 WHERE id=1")
-    conn.commit()
