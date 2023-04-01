@@ -1,3 +1,4 @@
+from os import path
 from db_utils import run_sql_query, run_sql_script, get_connection, run_query_and_commit
 from queries import (
     ask_user_for_query,
@@ -41,8 +42,9 @@ def populate_db():
     """Configure the schema, views, triggers and insert instances into the database"""
     print("Adicionando instâncias, views e triggers ao banco de dados...")
     with get_connection() as conn:
-        run_sql_script(conn, "./sql/instancias.sql")
-        run_sql_script(conn, "./sql/view_and_trigger.sql")
+        absolute_path = path.dirname(__file__)
+        run_sql_script(conn, path.join(absolute_path, "./sql/instancias.sql"))
+        run_sql_script(conn, path.join(absolute_path, "./sql/view_and_trigger.sql"))
     print("Pronto!")
 
 
