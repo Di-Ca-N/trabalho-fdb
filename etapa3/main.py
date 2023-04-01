@@ -71,6 +71,7 @@ def handle_trigger():
             "ID, nome, vida, motivação e ginásio do Pokémon com id=1", records
         )
 
+        print()
         print(
             "Executando atualização: definindo a motivação do Pokémon com id=1 para 0"
         )
