@@ -5,24 +5,25 @@ from db_utils import run_sql_query
 @dataclass
 class Query:
     """Represent an arbitrary SQL query.
-    
+
     Attributes:
         description (str): Text that describes what the query does. Will
             be displayed to the user.
         sql (str): SQL query to execute. The query may have parameters,
             marked by the string substitution placeholder '%s'.
-        parameters (dict[str, type]): Parameters dictionary, indicating 
-            the parameters the query expects. The key is the verbose 
-            name of the parameter, and the value is its type. The number 
-            of items must equal the number of query parameters. 
+        parameters (dict[str, type]): Parameters dictionary, indicating
+            the parameters the query expects. The key is the verbose
+            name of the parameter, and the value is its type. The number
+            of items must equal the number of query parameters.
     """
+
     description: str
     sql: str
     parameters: dict[str, type] = field(default_factory=dict)
 
     def get_parameters(self):
         """Get the query parameters
-        
+
         Use the 'parameters' attribute to ask the used for the required
         query parameters
         """
@@ -40,12 +41,18 @@ class Query:
                 else:
                     valid = True
             parameter_values.append(value)
-    
+
         return parameter_values
 
     def run(self, conn):
+        """Get the required parameters and execute the query
+
+        Arguments:
+            conn: The DB connection
+        """
         parameters = self.get_parameters()
         return run_sql_query(conn, self.sql, parameters)
+
 
 queries = [
     Query(
@@ -57,7 +64,7 @@ queries = [
                 JOIN Jogadores ON Inventarios.jogador_id=Jogadores.id
             WHERE Jogadores.nome=%s;
         """,
-        parameters={'Nome do jogador: ': str}
+        parameters={"Nome do jogador: ": str},
     ),
     Query(
         description="Pokémon do Jogador 1 que podem evoluir",
@@ -71,7 +78,7 @@ queries = [
                 JOIN Especies ON forma_pokemon.especie_id=Especies.id
                 LEFT JOIN Formas evolucao ON evolucao.evolui_de=forma_pokemon.id
             WHERE Jogadores.nome='Jogador 1' AND itens.id=especies.doce_id AND inventarios.quantidade>=evolucao.custo_evolucao;
-        """
+        """,
     ),
     Query(
         description="Forma com maior ataque básico, por cada tipo de Pokémon",
@@ -88,7 +95,7 @@ queries = [
                     JOIN TipoForma ON Formas.id=TipoForma.forma_id
                 WHERE tipo_id=TipoEXT.tipo_id
             );
-        """
+        """,
     ),
     Query(
         description="Para cada ginásio que possui pelo menos dois defensores do tipo fogo, qual é a menor motivação entre esses defensores",
@@ -101,7 +108,7 @@ queries = [
             WHERE Tipos.nome='Fogo'
             GROUP BY (Ginasios.local_id)
             HAVING COUNT(*) >= 2;
-        """
+        """,
     ),
     Query(
         description="Quais são os tipos de ataques que nenhum Pokémon do jogador 1 conhece",
@@ -116,7 +123,7 @@ queries = [
                     JOIN Jogadores ON treinador_id=Jogadores.id
                 WHERE Jogadores.nome='Jogador 1'
             );
-        """
+        """,
     ),
     Query(
         description="Quantos Pokémon capturados de cada espécie um jogador tem",
@@ -130,7 +137,7 @@ queries = [
             GROUP BY (E.nome)
             ORDER BY (E.nome);
         """,
-        parameters={"Nome do jogador: ": str}
+        parameters={"Nome do jogador: ": str},
     ),
     Query(
         description="Número de ginásios defendidos por cada time",
@@ -140,7 +147,7 @@ queries = [
                 JOIN PokemonCapturados ON PokemonCapturados.treinador_id=Jogadores.id
                 JOIN Ginasios ON Ginasios.local_id=PokemonCapturados.defensor_ginasio_id
             GROUP BY time;
-        """
+        """,
     ),
     Query(
         description="Quais são os ids, nomes e probabilidades dos itens obtíveis em um local",
@@ -152,7 +159,7 @@ queries = [
                 JOIN Itens I ON I.id=item_id
             WHERE L.id=%s;
         """,
-        parameters={"ID do local: ": int}
+        parameters={"ID do local: ": int},
     ),
     Query(
         description="id e nome dos jogadores que não possuem nenhum pokémon das espécies que o Jogador 1 possui",
@@ -173,7 +180,7 @@ queries = [
                     JOIN Formas ON Formas.id=forma_id
                 WHERE Jogadores.nome='Jogador 1'
             );
-        """
+        """,
     ),
     Query(
         description="id, latitude e longitude dos Pokémon Selvagens com os quais o Jogador 2 já encerrou uma tentativa de captura",
@@ -183,7 +190,7 @@ queries = [
                 JOIN TentativasDeCaptura T ON T.pokemon_id=PS.id
                 JOIN Jogadores J ON J.id=T.jogador_id
             WHERE finalizado=true AND nome='Jogador 2';
-        """
+        """,
     ),
     Query(
         description="id, latitude e longitude das Pokéstops com isca válida que o Jogador 1 já interagiu alguma vez",
@@ -193,9 +200,16 @@ queries = [
                 JOIN Fotodiscos F ON F.local_id=Locais.id
                 JOIN Pokestops P ON P.local_id=Locais.id
             WHERE jogador_id=1 AND isca_validade > NOW();
-        """
-    )
+        """,
+    ),
 ]
+
+trigger_update = "UPDATE PokemonCapturados SET defensor_motivacao=0 WHERE id=1"
+display_db_state = """
+    SELECT id, nome, vida_atual, defensor_motivacao, defensor_ginasio_id
+    FROM pokemon_capturados_completos 
+    WHERE id=1;
+"""
 
 
 def ask_user_for_query():
@@ -210,12 +224,12 @@ def ask_user_for_query():
     while not valid:
         try:
             option = int(input("> ")) - 1
- 
+
             if option < 0 or option >= len(queries):
                 print("Opcao invalida")
             else:
                 valid = True
- 
+
         except ValueError:
             print("Opção inválida")
 
@@ -224,7 +238,7 @@ def ask_user_for_query():
 
 def display_records(title, records):
     """Print to the terminal the records
-    
+
     Arguments:
         title (str): Title of the list
         records (list[Any]): List of records to be printed
@@ -242,3 +256,10 @@ def display_records(title, records):
         print(f"{idx}) {record_str}")
 
     print(bottom_ruler)
+
+
+def run_update_query(conn):
+    print("Executando atualização - Definindo para 0 a motivação do pokemon com id=1")
+    with conn.cursor() as cur:
+        cur.execute("UPDATE PokemonCapturados SET defensor_motivacao=0 WHERE id=1")
+    conn.commit()

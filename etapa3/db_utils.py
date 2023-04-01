@@ -24,23 +24,6 @@ def get_connection():
         yield conn
 
 
-def run_sql_script(conn, script_path):
-    """Execute an SQL script using the provided connection
-
-    Arguments:
-        conn (psycopg.Connection): Connection to the database
-        script_path (str): Path to the script to be executed
-    """
-
-    script_file = pathlib.Path(script_path)
-    with conn.cursor() as cur:
-        script = script_file.read_text(encoding="utf-8")
-        cur.execute(script)
-
-    # Persist the changes
-    conn.commit()
-
-
 def run_sql_query(conn, query, parameters=None):
     """Run an SQL query using the provided connection
 
@@ -51,9 +34,34 @@ def run_sql_query(conn, query, parameters=None):
 
     Returns: List of records (Any)
     """
-
-    parameters = parameters or []
-
     with conn.cursor() as cur:
         cur.execute(query, parameters)
         return list(cur)
+
+
+def run_query_and_commit(conn, query, parameters=None):
+    """Run an SQL query and commit the changes
+
+    Arguments:
+        conn (psycopg.Connection): Connection to the database
+        query (str): Query to be executed
+        parameters (Optional[Iterable]): parameters to the query
+    """
+    with conn.cursor() as cur:
+        cur.execute(query, parameters)
+
+    # Persist the changes
+    conn.commit()
+
+
+def run_sql_script(conn, script_path):
+    """Execute an SQL script using the provided connection
+
+    Arguments:
+        conn (psycopg.Connection): Connection to the database
+        script_path (str): Path to the script to be executed
+    """
+
+    script_file = pathlib.Path(script_path)
+    script = script_file.read_text(encoding="utf-8")
+    run_query_and_commit(conn, script)
